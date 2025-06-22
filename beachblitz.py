@@ -21,11 +21,23 @@ crab = pygame.transform.scale(crab, (230, 230))
 beachball_xpos = 0 #initialize
 beachball_ypos = random.randint(0, 800 - 50)  
 player_rect = crab.get_rect(topleft=(280, 400))
-obstacle_rect = beachball.get_rect(topleft=(beachball_ypos, 0))  
+ 
 text_1_rect = text_surface_1.get_rect(center=(400, 700))  # Center the score text at the bottom of the screen
 
 text_rect = text_surface.get_rect(center=(400, 100))  # Center the text at the top of the screen
 player_gravity = 0  # Gravity for the crab
+beachballs = []
+for _ in range(6):
+    x = random.randint(0,800-80)
+    y = 0
+    delay = _ * 40
+    obstacle_rect = beachball.get_rect(topleft=(x,y))
+    beachballs.append({'rect': obstacle_rect, 'timer': delay})
+
+score = 0
+
+game_active = True  # Add this line to define game_active
+
 
 while True:
     for event in pygame.event.get(): #checks for all possible events
@@ -50,17 +62,31 @@ while True:
     if player_rect.bottom >= 800:
         player_rect.bottom = 800
         player_gravity = 0
+    if game_active:
+        screen.fill((0, 0, 0))  
+        screen.blit(test_surface, (0, 0))  #center tje image
+        screen.blit(text_surface, text_rect)
+        screen.blit(text_surface_1, text_1_rect)  
+        screen.blit(crab, player_rect)
+        for ball in beachballs[:]:
+            if ball['timer'] > 0:
+                ball['timer'] -= 1
+            else:
+                ball['rect'].y += 6
+         
+        
+                screen.blit(beachball, ball['rect'])
+            
 
-    screen.fill((0, 0, 0))  
-    screen.blit(test_surface, (0, 0))  #center tje image
-    screen.blit(text_surface, text_rect)
-    screen.blit(text_surface_1, text_1_rect)  
-    screen.blit(crab, player_rect) 
-    screen.blit(beachball, (beachball_ypos, beachball_xpos))  
-    beachball_xpos += 10  
-    if beachball_xpos > 800: 
-        beachball_xpos = -230
-        beachball_ypos = random.randint(0, 800 - 50)  # Start from the top again
+            if ball['rect'].y > 800:
+                ball['rect'].y = 0
+                ball['rect'].x = random.randint(0, 800 - 80)
+                ball['timer'] = random.randint(0, 100)  # Reset timer to a random value
+                   
+            if player_rect.colliderect(ball['rect']):
+                beachballs.remove(ball) #add sound later
+                score += 1
+
     pygame.display.update()
     clock.tick(60)
 
