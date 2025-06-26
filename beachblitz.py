@@ -120,10 +120,13 @@ score = 0
 
 game_active = False  # Game starts on the start screen
 game_over = False
+speed_boost = False
+speed_slow = False
+greenused = False
+blueused= False
 
 while True:
-    speed_boost = False
-    speed_slow = False
+    
     for event in pygame.event.get(): #checks for all possible events
         if event.type == pygame.QUIT: #if quit then quit
             pygame.quit() #closes the window
@@ -157,16 +160,25 @@ while True:
     
     
     keys = pygame.key.get_pressed()
-
+    if speed_boost:
+        player_speed = 30
+        if pygame.time.get_ticks() - speed_boost_timer > 2000:
+            speed_boost = False
+            player_speed = 10
+    elif speed_slow:
+        player_speed=1
+        if pygame.time.get_ticks() - speed_slow_timer > 2000:
+            speed_slow = False
+            player_speed = 10
+    else:
+        player_speed = 10
     if keys[pygame.K_LEFT] and player_rect.left > 0:
         crabwalk()
         player_rect.x -= player_speed 
     if keys[pygame.K_RIGHT] and player_rect.right < 800:
         crabwalk()
         player_rect.x += player_speed
-    
-   
-    
+
     player_gravity += 1
     player_rect.y += player_gravity
 
@@ -184,18 +196,7 @@ while True:
         screen.blit(crab, player_rect)
         
         for ball in beachballs[:]:
-            if speed_boost:
-                player_speed = 30
-                if pygame.time.get_ticks() - speed_boost_timer > 2000:
-                    speed_boost = False
-                    player_speed = 10
-            elif speed_slow:
-                player_speed=1
-                if pygame.time.get_ticks() - speed_slow_timer > 2000:
-                    speed_slow = False
-                    player_speed = 10
-            else:
-                player_speed = 10
+            
             
             if ball['timer'] > 0:
                 ball['timer'] -= 1
@@ -207,9 +208,11 @@ while True:
                 elif ball['type'] == 'red':
                    screen.blit(redball,ball['rect'])
                 elif ball['type'] == 'blue':
-                   screen.blit(blueball, ball['rect'])
+                   
+                    screen.blit(blueball, ball['rect']) 
                 elif ball['type'] == 'green':
-                   screen.blit(greenball, ball['rect'])
+                  
+                    screen.blit(greenball, ball['rect'])
                 else:
                    screen.blit(beachball, ball['rect'])
 
@@ -251,25 +254,33 @@ while True:
                     red_rect = redball.get_rect(topleft=(x,y))
                     beachballs.append({'rect': red_rect, 'timer': delay, 'type': 'red'})
                 elif ball['type'] == 'blue':
-                    beachballs.remove(ball)
-                    speed_boost = True
-                    speed_boost_timer = pygame.time.get_ticks()
-                    score += 5
-                    y=0
-                    x=random.randint(0,800-80)
-                    delay=300
-                    blue_rect = blueball.get_rect(topleft=(x,y))
-                    beachballs.append({'rect':blue_rect, 'timer':delay, 'type': 'blue'})
+                    
+                    if not speed_boost and not speed_slow:
+                        beachballs.remove(ball)
+                        speed_boost = True
+                        speed_boost_timer = pygame.time.get_ticks()
+                        score += 5
+                        y=0
+                        x=random.randint(0,800-80)
+                        delay=300
+                        blue_rect = blueball.get_rect(topleft=(x,y))
+                        beachballs.append({'rect':blue_rect, 'timer':delay, 'type': 'blue'})
+                    else:
+                        beachballs.remove(ball)
                 elif ball['type'] == 'green':
-                    beachballs.remove(ball)
-                    score+=1
-                    speed_slow = True
-                    speed_slow_timer = pygame.time.get_ticks()
-                    x = random.randint(0,800-80)
-                    y = 0
-                    delay = 300
-                    green_rect = greenball.get_rect(topleft=(x,y))
-                    beachballs.append({'rect':green_rect, 'timer':delay, 'type': 'green'})
+                    
+                    if not speed_slow and not speed_boost:
+                        beachballs.remove(ball)
+                        score+=1
+                        speed_slow = True
+                        speed_slow_timer = pygame.time.get_ticks()
+                        x = random.randint(0,800-80)
+                        y = 0
+                        delay = 300
+                        green_rect = greenball.get_rect(topleft=(x,y))
+                        beachballs.append({'rect':green_rect, 'timer':delay, 'type': 'green'})
+                    else:
+                        beachballs.remove(ball)
 
                     
     if game_over == True:
