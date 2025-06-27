@@ -4,8 +4,9 @@ import random
 
 pygame.init() #starts pygame 
 def crabwalk():
-    global crab, crab_ind
-    crab_ind += 0.1
+    global crab, crab_ind,crab_1,crab_2_size
+    
+    crab_ind+=0.1
     if crab_ind >= len(crabwalk_frames):
         crab_ind = 0
     crab = crabwalk_frames[int(crab_ind)]
@@ -68,7 +69,7 @@ def setup_beachballs():
                 x = random.randint(0,800-80)
         delay = _ * 250
         green_rect = greenball.get_rect(topleft=(x,y)) 
-        o = random.randint(9,13)
+        o = random.randint(4,8)
         if _ % int(o) == 0:
             beachballs.append({'rect': green_rect, 'timer': delay, 'type': 'green'})
 
@@ -85,48 +86,57 @@ score =0
 score_surface = font.render(f"Score: {score}", True, "#ffcc33")
 screen.blit(score_surface, (20, 20))
 crab_2 = pygame.image.load('characterimages/crab_1.png').convert_alpha()
-crab_2_size = pygame.transform.scale(crab_2, (230, 230))  # Use convert_alpha for images with transparency
+crab_2 = pygame.transform.scale(crab_2, (230, 230))  
 
-cage = pygame.image.load('characterimages/cage.png').convert_alpha()  # Use convert_alpha for images with transparency
+cage = pygame.image.load('characterimages/cage.png').convert_alpha()  
 crab_1 = pygame.image.load('characterimages/crab.png').convert_alpha()
-crab_1 = pygame.transform.scale(crab_1, (230, 230))   # Use convert_alpha for images with transparency
-beachball = pygame.image.load('characterimages/beachball.png').convert_alpha()  # Use convert_alpha for images with transparency
+crab_1 = pygame.transform.scale(crab_1, (230, 230))   
+beachball = pygame.image.load('characterimages/beachball.png').convert_alpha()  
 beachball = pygame.transform.scale(beachball, (160, 160)) 
 
 cage = pygame.transform.scale(cage,(200, 200))  
 beachball_xpos = 0 #initialize
 beachball_ypos = random.randint(0, 800 - 50)  
 
-crabwalk_frames = [crab_1, crab_2_size]
+original_crabwalk_frames = [crab_1, crab_2]
+crabwalk_frames = original_crabwalk_frames.copy()
 crab_ind = 0
 crab = pygame.transform.scale(crabwalk_frames[crab_ind], (230, 230))
 player_rect = crab.get_rect(topleft=(280, 400))
-redball=pygame.image.load('characterimages/redball.png').convert_alpha()  # Use convert_alpha for images with transparency
-blueball=pygame.image.load('characterimages/blueball.png').convert_alpha()  # Use convert_alpha for images with transparency
+redball=pygame.image.load('characterimages/redball.png').convert_alpha()  
+blueball=pygame.image.load('characterimages/blueball.png').convert_alpha()  
 greenball=pygame.image.load('characterimages/greenball.png').convert_alpha()
 redball = pygame.transform.scale(redball,(160,160))
 blueball = pygame.transform.scale(blueball, (160,160))
-greenball = pygame.transform.scale(greenball, (160,160))  # Use convert_alpha for images with transparency
-  # Initialize cage_rect
+greenball = pygame.transform.scale(greenball, (160,160))  
+bluegreen_crab = pygame.image.load('characterimages/bluegreen.png').convert_alpha()
+bluegreen_crab = pygame.transform.scale(bluegreen_crab, (230,230))
+bluegreen_crab_1 = pygame.image.load('characterimages/bluegreen_1.png').convert_alpha()
+bluegreen_crab_1 = pygame.transform.scale(bluegreen_crab_1, (230,230))
 
-  # Center the score text at the bottom of the screen
 
-text_rect = text_surface.get_rect(center=(400, 100))  # Center the text at the top of the screen
-player_gravity = 0  # Gravity for the crab
+text_rect = text_surface.get_rect(center=(400, 100))  
+player_gravity = 0  
 beachballs = []
 random_1 = []
-player_speed = 10  # Speed of the crab
+player_speed = 10 
 score = 0
-
-game_active = False  # Game starts on the start screen
+  
+game_active = False  
 game_over = False
 speed_boost = False
 speed_slow = False
-greenused = False
-blueused= False
+greencollected = False
+bluecollected = False
+bluegreen_powerup = False
+bluegreen_powerup_timer = 0
+
+powerup_ready_time = 0
 
 while True:
-    
+
+    pygame.time.get_ticks() 
+
     for event in pygame.event.get(): #checks for all possible events
         if event.type == pygame.QUIT: #if quit then quit
             pygame.quit() #closes the window
@@ -155,23 +165,37 @@ while True:
     keys = pygame.key.get_pressed()
     if event.type == pygame.K_SPACE:
         game_active = True
-
+   
 
     
     
     keys = pygame.key.get_pressed()
-    if speed_boost:
-        player_speed = 30
+    powerup_ready_time = pygame.time.get_ticks() + random.randint(30000, 900000)
+    if bluegreen_powerup == True:
+        bluegreen_powerup_timer = pygame.time.get_ticks()
+        player_speed = 35
+        crab = bluegreen_crab
+        if pygame.time.get_ticks() - bluegreen_powerup_timer > 5000:
+            bluegreen_powerup = False
+            player_speed = 10
+            crabwalk_frames = original_crabwalk_frames.copy()  # <-- revert to original frames
+            crab = crabwalk_frames[int(crab_ind)]
+    elif speed_boost:
+        player_speed = 20
+        crab = crabwalk_frames[int(crab_ind)]
         if pygame.time.get_ticks() - speed_boost_timer > 2000:
             speed_boost = False
             player_speed = 10
     elif speed_slow:
         player_speed=1
+        crab = crabwalk_frames[int(crab_ind)]
         if pygame.time.get_ticks() - speed_slow_timer > 2000:
             speed_slow = False
             player_speed = 10
     else:
         player_speed = 10
+        crab = crabwalk_frames[int(crab_ind)]
+   
     if keys[pygame.K_LEFT] and player_rect.left > 0:
         crabwalk()
         player_rect.x -= player_speed 
@@ -244,8 +268,9 @@ while True:
                     beachball_rect = beachball.get_rect(topleft=(x,y))
                     beachballs.append({'rect': beachball_rect, 'timer': delay, 'type': 'beachball'})
                 elif ball['type'] == 'red':
+                    redcollected = True
                     beachballs.remove(ball)
-                    score +=10
+                    score +=15
                     score_surface = font.render(f"Score: {score}", True, "#ffcc33")
                     screen.blit(score_surface, (20, 20))
                     x=random.randint(0,800-80)
@@ -254,12 +279,20 @@ while True:
                     red_rect = redball.get_rect(topleft=(x,y))
                     beachballs.append({'rect': red_rect, 'timer': delay, 'type': 'red'})
                 elif ball['type'] == 'blue':
-                    
+                    bluecollected = True
+                    if greencollected and bluecollected and pygame.time.get_ticks() >= powerup_ready_time:
+                        bluegreen_powerup = True
+                        bluegreen_powerup_timer = pygame.time.get_ticks()
+                        speed_boost = False
+                        speed_slow = False
+                        greencollected = False
+                        bluecollected = False
+                        crabwalk_frames = [bluegreen_crab, bluegreen_crab_1]
                     if not speed_boost and not speed_slow:
                         beachballs.remove(ball)
+                        score += 5
                         speed_boost = True
                         speed_boost_timer = pygame.time.get_ticks()
-                        score += 5
                         y=0
                         x=random.randint(0,800-80)
                         delay=300
@@ -268,7 +301,15 @@ while True:
                     else:
                         beachballs.remove(ball)
                 elif ball['type'] == 'green':
-                    
+                    greencollected = True
+                    if greencollected and bluecollected and pygame.time.get_ticks() >= powerup_ready_time:
+                            bluegreen_powerup = True
+                            bluegreen_powerup_timer = pygame.time.get_ticks()
+                            speed_boost = False
+                            speed_slow = False
+                            bluecollected = False
+                            greencollected = False
+                            crabwalk_frames = [bluegreen_crab, bluegreen_crab_1]
                     if not speed_slow and not speed_boost:
                         beachballs.remove(ball)
                         score+=1
