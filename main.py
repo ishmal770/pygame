@@ -12,10 +12,11 @@ async def main():
     clock = pygame.time.Clock()
     font = pygame.font.Font('./textfont/Pixel-regular.ttf', 50)
 
-    
+    # --- First-click requirement (black screen, white centered text) ---
     screen.fill((0, 0, 0))
     start_text = font.render("CLICK ANYWHERE TO START", True, (255, 255, 255))
-    screen.blit(start_text, (800, 400))
+    start_text_rect = start_text.get_rect(center=(400, 400))  # Centered on 800x800 screen
+    screen.blit(start_text, start_text_rect)
     pygame.display.flip()
 
     waiting = True
