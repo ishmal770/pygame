@@ -12,7 +12,7 @@ async def main():
     clock = pygame.time.Clock()
     font = pygame.font.Font('./textfont/Pixel-regular.ttf', 50)
 
-    # --- First-click requirement (black screen, white centered text) ---
+   
     screen.fill((0, 0, 0))
     start_text = font.render("CLICK ANYWHERE TO START", True, (255, 255, 255))
     start_text_rect = start_text.get_rect(center=(400, 400))  # Centered on 800x800 screen
@@ -26,7 +26,7 @@ async def main():
                 waiting = False
         await asyncio.sleep(0)  # Critical for pygbag
 
-    # --- Asset loading with explicit paths ---
+   
     test_surface = pygame.image.load('./graphicsbg/background.png')
     crab_2 = pygame.image.load('./characterimages/crab_1.png').convert_alpha()
     crab_2 = pygame.transform.scale(crab_2, (230, 230))
@@ -356,15 +356,22 @@ async def main():
                 if player_rect.colliderect(ball['rect']):
                     if ball['type'] == 'cage':
                        
-                        if ball['rect'].y < 600:
-                            x = random.randint(0, 800-80)
-                            y = 0
-                            delay = 150
-                            cage_rect = cage.get_rect(topleft=(x, y))
-                            beachballs.append({'rect': cage_rect, 'timer': delay, 'type': 'cage'})
-                            game_over = True
-                            break
-                        #
+                       if ball['type'] == 'cage':
+                        
+                        cage_center_x = ball['rect'].centerx
+                        cage_center_y = ball['rect'].centery
+                        cage_center_rect = pygame.Rect(cage_center_x - 10, cage_center_y - 10, 20, 20)
+                        
+                        if player_rect.colliderect(cage_center_rect):
+                            if ball['rect'].y < 600:
+                                x = random.randint(0, 800-80)
+                                y = 0
+                                delay = 150
+                                cage_rect = cage.get_rect(topleft=(x, y))
+                                beachballs.append({'rect': cage_rect, 'timer': delay, 'type': 'cage'})
+                                game_over = True
+                                break
+                        
 
                     elif ball['type'] == 'beachball':
                         beachballs.remove(ball)  # add sound later
@@ -375,7 +382,7 @@ async def main():
                         x = random.randint(0, 800 - 80)
                         y = 0
                     
-                        delay = 40  # Random delay for the new beachball
+                        delay = 40  
                         beachball_rect = beachball.get_rect(topleft=(x,y))
                         beachballs.append({'rect': beachball_rect, 'timer': delay, 'type': 'beachball'})
                     elif ball['type'] == 'red':
@@ -466,7 +473,7 @@ async def main():
         
         pygame.display.update()
         clock.tick(60)
-        await asyncio.sleep(0)  # Yield control to browser/event loop
+        await asyncio.sleep(0) 
 
 
 if __name__ == "__main__":
